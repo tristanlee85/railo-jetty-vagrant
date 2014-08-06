@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# Starts, stops, and restarts Railo
+RAILO_DIR="<%= node[:railo_path] %>"
+JAVA_OPTS_MAIN="-DSTOP.PORT=8887 -DSTOP.KEY=railo -jar"
+JAVA_OPTS_AGENT="-javaagent:lib/ext/railo-inst.jar"
+JAVA_OPTS_MEM="-Xms256M -Xmx512M"
+JAVA_OPTS_JAR="start.jar --module=http jetty.port=8880"
+SERVICE_NAME="Railo/Jetty"
+PID_PATH_NAME=/tmp/RailoJetty-pid
+
+case $1 in
+    start)
+        echo "Starting $SERVICE_NAME ..."
+        if [ ! -f $PID_PATH_NAME ]; then
+            cd $RAILO_DIR
+            nohup $RAILO_DIR/jre/bin/java $JAVA_OPTS_MAIN $JAVA_OPTS_MEM $JAVA_OPTS_AGENT $JAVA_OPTS_JAR 2>> /dev/null >> /dev/null &
+                        echo $! > $PID_PATH_NAME
+            echo "$SERVICE_NAME started ..."
+        else
+            echo "$SERVICE_NAME is already running ..."
+        fi
+    ;;
+    stop)
+        if [ -f $PID_PATH_NAME ]; then
+            PID=$(cat $PID_PATH_NAME);
+            echo "$SERVICE_NAME stoping ..."
+            kill $PID;
+            echo "$SERVICE_NAME stopped ..."
+            rm $PID_PATH_NAME
+        else
+            echo "$SERVICE_NAME is not running ..."
+        fi
+    ;;
+    restart)
+        if [ -f $PID_PATH_NAME ]; then
+            PID=$(cat $PID_PATH_NAME);
+            echo "$SERVICE_NAME stopping ...";
+            kill $PID;
+            echo "$SERVICE_NAME stopped ...";
+            rm $PID_PATH_NAME
+            echo "$SERVICE_NAME starting ..."
+            cd $RAILO_DIR
+            nohup $RAILO_DIR/jre/bin/java $JAVA_OPTS_MAIN $JAVA_OPTS_MEM $JAVA_OPTS_AGENT $JAVA_OPTS_JAR /tmp 2>> /dev/null >> /dev/null &
+                        echo $! > $PID_PATH_NAME
+            echo "$SERVICE_NAME started ..."
+        else
+            echo "$SERVICE_NAME is not running ..."
+        fi
+    ;;
+esac

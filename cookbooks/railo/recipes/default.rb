@@ -14,13 +14,14 @@ webroot = node[:webroot]
 if File.exist?(railo_path)
 	FileUtils::remove_dir railo_path
 end
-if File.exist?(railo_path_temp)
-	FileUtils::remove_dir railo_path_temp
-end
+#if File.exist?(railo_path_temp)
+#	FileUtils::remove_dir railo_path_temp
+#end
 FileUtils::mkdir_p railo_path
 FileUtils::mkdir_p railo_path_temp
 
 # download Railo Express (includes Jetty)
+log "Downloading Railo Express..."
 remote_file "#{railo_path_temp}/railo-express-#{railo_version}-jre-linux64.tar.gz" do
 	source "http://www.getrailo.org/railo/remote/download42/#{railo_version}/railix/linux/railo-express-#{railo_version}-jre-linux64.tar.gz"
 	action :create_if_missing
@@ -30,6 +31,7 @@ remote_file "#{railo_path_temp}/railo-express-#{railo_version}-jre-linux64.tar.g
 end
 
 # extract the files
+log "Extracting/Installing Railo Express..."
 execute "tar xvzf railo-express-#{railo_version}-jre-linux64.tar.gz" do
   creates "railo-#{railo_version}"
   action :run
@@ -63,20 +65,16 @@ execute "chown -R root:root #{railo_path}" do
 end
 
 # create the jetty service
-execute "cp start /etc/init/railo" do
-	action :run
-	user "root"
-	cwd railo_path
-end
-
-execute "echo RAILO_HOME='pwd' > /etc/default/railo" do
-	action :run
-	user "root"
-	cwd railo_path
+log "Activating service..."
+template "/etc/init.d/railo" do
+	action :create
+	mode "0755"
+	source "railo.sh.erb"
 end
 
 service "railo" do
-	action :start
+	supports :restart => true
+	action [ :enable, :start ]
 end
 
 
