@@ -1,2 +1,2 @@
 default[:railo][:admin_password]	= "railoadmin"
-default[:railo][:hostname]			= "gensuite.dev"
+default[:railo][:hostname]			= "local.dev"
