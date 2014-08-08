@@ -98,7 +98,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
    end
   
   # Enable shell provisioning
-  config.vm.provision :shell, :path => "vagrant-data/provision.sh", run: "always"
+  #config.vm.provision :shell, :path => "vagrant-data/provision.sh", run: "always"
 
   # Enable provisioning with chef server, specifying the chef server URL,
   # and the path to the validation key (relative to this Vagrantfile).
